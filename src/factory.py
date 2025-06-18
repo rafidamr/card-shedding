@@ -3,7 +3,7 @@ from schema.card import Card, Color, Effect
 
 
 def create_cards():
-    cards : List[Card] = []
+    cards: List[Card] = []
 
     for c in [Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW]:
         for n in range(1, 10):

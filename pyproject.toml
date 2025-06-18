@@ -1,0 +1,23 @@
+[project]
+name = "card-shedding"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Muhammad Rafid Amrullah",email = "rafid.tijarah@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "black (>=25.1.0,<26.0.0)",
+    "pre-commit (>=4.2.0,<5.0.0)"
+]
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.4.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

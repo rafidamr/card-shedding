@@ -4,5 +4,4 @@ The objectives of this experiment are:
 * Experiment with LLM to produce and enforce the game rules 
 
 Available games:
-
 * UNO

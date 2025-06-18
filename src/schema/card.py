@@ -4,12 +4,14 @@ from typing import Optional
 
 from schema.game import Game
 
+
 class Color(Enum):
     RED = auto()
     GREEN = auto()
     BLUE = auto()
     YELLOW = auto()
     WILD = auto()
+
 
 class Effect(Enum):
     NONE = auto()
@@ -18,11 +20,12 @@ class Effect(Enum):
     DRAW_TWO = auto()
     WILD = auto()
 
+
 @dataclass(frozen=True)
-class Card():
-    color : Color
-    number : Optional[int] = None
-    effect : Effect = Effect.NONE
+class Card:
+    color: Color
+    number: Optional[int] = None
+    effect: Effect = Effect.NONE
 
     def apply_effect(self, game: Game):
         if self.effect == Effect.SKIP:
