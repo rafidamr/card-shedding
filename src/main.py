@@ -1,7 +1,6 @@
-from factory import create_cards
+from engine import Engine
 
 
 if __name__ == "__main__":
-    cards = create_cards()
-    print(len(cards))
-    print(cards[-1])
+    engine = Engine(timeout=0)
+    engine.run()

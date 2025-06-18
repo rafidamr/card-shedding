@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
 
-from schema.game import Game
-
 
 class Color(Enum):
     RED = auto()
@@ -27,12 +25,10 @@ class Card:
     number: Optional[int] = None
     effect: Effect = Effect.NONE
 
-    def apply_effect(self, game: Game):
-        if self.effect == Effect.SKIP:
-            pass
-        elif self.effect == Effect.REVERSE:
-            pass
-        elif self.effect == Effect.DRAW_TWO:
-            pass
-        elif self.effect == Effect.WILD:
-            pass
+    def __str__(self):
+        if self.effect == Effect.NONE:
+            return f"{self.color.name.title()} {self.number}"
+        elif self.effect in {Effect.WILD}:
+            return f"{self.effect.name.title()}"
+        else:
+            return f"{self.color.name.title()} {self.effect.name.title()}"

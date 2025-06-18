@@ -1,19 +1,23 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from random import shuffle
 from typing import List
 
 from schema.card import Card
 
 
-class Type(Enum):
-    STOCK = auto()
-    DISCARD = auto()
-
-
 @dataclass
 class Deck:
-    type: Type
-    cards: List[Card] = []
+    cards: List[Card]
 
+
+class StockDeck(Deck):
     def reshuffle(self):
-        pass
+        shuffle(self.cards)
+
+    def pop_card(self) -> Card:
+        return self.cards.pop()
+
+
+class DiscardDeck(Deck):
+    def receive_card(self, card: Card):
+        self.cards.append(card)

@@ -1,20 +1,27 @@
-from typing import List
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import List, Optional, Self
 
 from schema.card import Card
+from schema.deck import StockDeck
 
 
+class Action(Enum):
+    PICK = auto()
+    PLAY = auto()
+
+
+@dataclass
 class Player:
-    id: str
+    name: str
     cards: List[Card]
 
-    def __init__(self, id: str):
-        self.id = id
+    def init_cards(self, deck: StockDeck, num: int):
+        for _ in range(num):
+            self.cards.append(deck.pop_card())
 
-    def inspect_discard_deck(self):
-        pass
+    def pick_card(self, deck: StockDeck):
+        self.cards.append(deck.pop_card())
 
-    def pick_card(self):
-        pass
-
-    def play(self):
-        pass
+    def draw(self, card_idx: int):
+        return self.cards.pop(card_idx)
