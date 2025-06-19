@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from random import shuffle
 from typing import List
 
-from schema.card import Card
+from schema.card import Card, Color
 
 
 @dataclass
@@ -12,12 +12,15 @@ class Deck:
 
 class StockDeck(Deck):
     def reshuffle(self):
-        shuffle(self.cards)
+        while True:
+            shuffle(self.cards)
+            if self.cards[-1].color != Color.WILD:
+                break
 
-    def pop_card(self) -> Card:
+    def pop(self) -> Card:
         return self.cards.pop()
 
 
 class DiscardDeck(Deck):
-    def receive_card(self, card: Card):
+    def receive(self, card: Card):
         self.cards.append(card)

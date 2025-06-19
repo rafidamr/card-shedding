@@ -14,36 +14,50 @@ class Engine:
     stock_deck: StockDeck
     discard_deck: DiscardDeck
 
-    def __init__(self, timeout: float, card_init=4):
+    def __init__(self, timeout: float, card_init: int):
         self.timeout = timeout
         self.interface = Interface()
-        self.current_player = Player("proguy", [])
+        self.current_player = Player("pro_guy", [], [])
         self.stock_deck = StockDeck(cards=create_cards())
         self.stock_deck.reshuffle()
-        self.discard_deck = DiscardDeck(cards=[])
+        self.discard_deck = DiscardDeck(cards=[self.stock_deck.pop()])
         self.current_player.init_cards(self.stock_deck, card_init)
 
     def run(self):
         # while True:
-        self.interface.show_state(self.current_player, self.discard_deck)
-        action = self.interface.select_actions()
-        self.apply_action(action)
-        self.interface.show_state(self.current_player, self.discard_deck)
+        try:
+            self.current_player.actions = [Action.PICK, Action.PLAY]
+            self.interface.show_state(self.current_player, self.discard_deck)
+            action = self.interface.select_actions(self.current_player)
+            self.apply_action(action)
+            self.interface.show_state(self.current_player, self.discard_deck)
+        except Exception as e:
+            print(e)
 
-    def apply_action(self, action: int):
+    def apply_action(self, action: Action):
         match action:
-            case Action.PICK.value:
+            case Action.PICK:
                 self.current_player.pick_card(self.stock_deck)
-            case Action.PLAY.value:
-                card_idx = self.interface.select_card(self.current_player)
-                card = self.current_player.draw(card_idx)
-                self.discard_deck.receive_card(card)
-                self.evaluate_effect(card)
+                self.current_player.actions = [Action.PLAY, Action.PASS]
+            case Action.PLAY:
+                if self.play():
+                    self.current_player.actions = [Action.PASS]
+            case Action.PASS:
+                pass
 
         # TBD:
-        # Decides who plays next and what can he can do
+        # Decides who plays next and what he can do
 
-    def evaluate_effect(self, card: Card):
+    def play(self) -> bool:
+        try:
+            card_idx = self.interface.select_card(self.current_player)
+            card = self.current_player.discard(card_idx, self.discard_deck)
+            self.apply_effect(card)
+            return True
+        except Exception as e:
+            raise e
+
+    def apply_effect(self, card: Card):
         if card.effect == Effect.SKIP:
             pass
         elif card.effect == Effect.REVERSE:
