@@ -20,7 +20,6 @@ class Engine:
         self.discard_deck = DiscardDeck(cards=[self.stock_deck.pop()])
         self.current_player = create_players(num_players, self.stock_deck, init_card)
         self.current_player.init_actions()
-        self.direction = Direction.NEXT
 
     def run(self):
         while True:

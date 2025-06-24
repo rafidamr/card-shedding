@@ -65,4 +65,5 @@ def create_players(num_players: int, deck: StockDeck, num: int) -> Player:
         player = player.next
         player.init_cards(deck, num)
     player.next = first
+    first.prev = player
     return first
