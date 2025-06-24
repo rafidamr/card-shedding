@@ -1,4 +1,5 @@
 import functools
+from schema.card import Effect
 from schema.deck import DiscardDeck
 from schema.player import Action, Player
 
@@ -17,6 +18,7 @@ def exception_handler(func):
 class Interface:
     @exception_handler
     def show_state(self, player: Player, dd: DiscardDeck):
+        print("----------------------")
         print(f"Player: {player.name}")
         print(f"Available cards:")
         for i, card in enumerate(player.cards):
@@ -44,3 +46,6 @@ class Interface:
         if option not in range(len(player.cards)):
             raise Exception("Action canceled")
         return int(option)
+
+    def effect_message(self, player: Player, effect: Effect):
+        print(f"[{effect.name.title()}] effect applies on {player.name}")

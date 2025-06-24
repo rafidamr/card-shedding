@@ -4,7 +4,7 @@ from factory import create_cards
 from interface import Interface
 from schema.card import Card, Effect
 from schema.deck import DiscardDeck, StockDeck
-from schema.player import Action, Player
+from schema.player import Action, Player, create_players
 
 
 class Engine:
@@ -13,26 +13,40 @@ class Engine:
     interface: Interface
     stock_deck: StockDeck
     discard_deck: DiscardDeck
+    active_effect: Effect = Effect.NONE
 
-    def __init__(self, timeout: float, card_init: int):
-        self.timeout = timeout
+    def __init__(self, num_players: int, timeout: float, card_init: int):
+        # self.timeout = timeout
         self.interface = Interface()
-        self.current_player = Player("pro_guy", [], [])
         self.stock_deck = StockDeck(cards=create_cards())
         self.stock_deck.reshuffle()
         self.discard_deck = DiscardDeck(cards=[self.stock_deck.pop()])
-        self.current_player.init_cards(self.stock_deck, card_init)
+        self.current_player = create_players(num_players, self.stock_deck, card_init)
 
     def run(self):
-        # while True:
-        try:
-            self.current_player.actions = [Action.PICK, Action.PLAY]
-            self.interface.show_state(self.current_player, self.discard_deck)
-            action = self.interface.select_actions(self.current_player)
-            self.apply_action(action)
-            self.interface.show_state(self.current_player, self.discard_deck)
-        except Exception as e:
-            print(e)
+        while True:
+            try:
+                # eval(self.apply_effect())
+                # TBD:
+                # assign actions on transition for the same player
+                self.current_player.actions = [Action.PICK, Action.PLAY]
+                self.interface.show_state(self.current_player, self.discard_deck)
+                action = self.interface.select_actions(self.current_player)
+                self.apply_action(action)
+                self.interface.show_state(self.current_player, self.discard_deck)
+            except Exception as e:
+                print(e)
+
+    def apply_effect(self) -> str:
+        def disable_effect():
+            self.active_effect = Effect.NONE
+
+        match self.active_effect:
+            case Effect.SKIP:
+                self.interface.effect_message(self.current_player, self.active_effect)
+                disable_effect()
+                return "continue"
+        return "None"
 
     def apply_action(self, action: Action):
         match action:
@@ -52,20 +66,10 @@ class Engine:
         try:
             card_idx = self.interface.select_card(self.current_player)
             card = self.current_player.discard(card_idx, self.discard_deck)
-            self.apply_effect(card)
+            self.active_effect = card.effect
             return True
         except Exception as e:
             raise e
-
-    def apply_effect(self, card: Card):
-        if card.effect == Effect.SKIP:
-            pass
-        elif card.effect == Effect.REVERSE:
-            pass
-        elif card.effect == Effect.DRAW_TWO:
-            pass
-        elif card.effect == Effect.WILD:
-            pass
 
     def skip(self):
         pass
