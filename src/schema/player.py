@@ -12,6 +12,11 @@ class Action(Enum):
     PLAY = auto()
 
 
+class Direction(Enum):
+    NEXT = auto()
+    PREV = auto()
+
+
 @dataclass
 class Player:
     name: str
@@ -40,6 +45,15 @@ class Player:
             deck.receive(card)
             return card
         raise Exception("Card is not applicable")
+
+    def init_actions(self):
+        self.actions = [Action.PICK, Action.PLAY]
+
+    def has_actions(self):
+        return len(self.actions) > 0
+
+    def change_player(self, d: Direction) -> Optional[Self]:
+        return self.next if d == Direction.NEXT else self.prev
 
 
 def create_players(num_players: int, deck: StockDeck, num: int) -> Player:
