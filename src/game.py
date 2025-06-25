@@ -1,6 +1,7 @@
+from typing import Optional
 from factory import create_players, create_cards
 from interface import Interface
-from schema.card import Effect
+from schema.card import Color, Effect
 from schema.deck import DiscardDeck, StockDeck
 from schema.player import Task, Direction, Player
 
@@ -27,7 +28,7 @@ class Game:
                 if not self.current_player.has_tasks():
                     self.change_turn()
                 self.interface.show_state(self.current_player, self.discard_deck)
-                task = self.interface.select_tasks(self.current_player)
+                task = self.interface.select_task(self.current_player)
                 self.perform(task)
                 self.interface.show_state(self.current_player, self.discard_deck)
             except Exception as e:
@@ -47,7 +48,8 @@ class Game:
     def play(self) -> bool:
         try:
             card_idx = self.interface.select_card(self.current_player)
-            card = self.current_player.discard(card_idx, self.discard_deck)
+            color = self.replace_wild(card_idx)
+            card = self.current_player.discard(card_idx, self.discard_deck, color)
             self.active_effect = card.effect
             return True
         except Exception as e:
@@ -63,13 +65,14 @@ class Game:
                 affected_player = self.reverse()
             case Effect.DRAW_TWO:
                 affected_player = self.force_draw(card_num=2)
-            case Effect.WILD:
-                pass
             case _:
                 self.current_player = self.current_player.change_player(self.direction)  # type: ignore
+                if self.active_effect == Effect.WILD:
+                    affected_player = self.current_player
 
         if affected_player:
             self.interface.effect_message(affected_player, self.active_effect)  # type: ignore
+
         self.current_player.init_tasks()
         self.active_effect = Effect.NONE
 
@@ -90,3 +93,7 @@ class Game:
         for _ in range(card_num):
             self.current_player.pick_card(self.stock_deck)
         return affected_player
+
+    def replace_wild(self, card_idx: int) -> Optional[Color]:
+        if self.current_player.cards[card_idx].effect == Effect.WILD:
+            return self.interface.select_color()

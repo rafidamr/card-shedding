@@ -29,6 +29,6 @@ class Card:
         if self.effect == Effect.NONE:
             return f"{self.color.name.title()} {self.number}"
         elif self.effect in {Effect.WILD}:
-            return f"{self.effect.name.title()}"
+            return f"{self.effect.name.title()} ({self.color.name.title()})"
         else:
             return f"{self.color.name.title()} {self.effect.name.title()}"

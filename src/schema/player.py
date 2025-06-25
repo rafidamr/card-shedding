@@ -32,18 +32,22 @@ class Player:
     def pick_card(self, deck: StockDeck):
         self.cards.append(deck.pop())
 
-    def discard(self, card_idx: int, deck: DiscardDeck) -> Card:
+    def discard(
+        self, card_idx: int, deck: DiscardDeck, replacement: Optional[Color]
+    ) -> Card:
         pcard = self.cards[card_idx]
         dcard = deck.cards[-1]
+        if pcard.effect == Effect.WILD and isinstance(replacement, Color):
+            object.__setattr__(pcard, "color", replacement)
         if (
             pcard.color == dcard.color
             or pcard.number == dcard.number
             or (pcard.effect == dcard.effect and pcard.effect != Effect.NONE)
-            or pcard.color == Color.WILD
+            or pcard.effect == Effect.WILD
         ):
-            card = self.cards.pop(card_idx)
-            deck.receive(card)
-            return card
+            self.cards.pop(card_idx)
+            deck.receive(pcard)
+            return pcard
         raise Exception("Card is not applicable")
 
     def init_tasks(self):
