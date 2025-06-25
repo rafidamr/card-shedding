@@ -1,7 +1,7 @@
 import functools
 from schema.card import Effect
 from schema.deck import DiscardDeck
-from schema.player import Action, Player
+from schema.player import Player, Task
 
 
 def exception_handler(func):
@@ -27,14 +27,14 @@ class Interface:
             print(f"Discard deck: {dd.cards[-1]}")
 
     @exception_handler
-    def select_actions(self, player: Player) -> Action:
+    def select_tasks(self, player: Player) -> Task:
         print("Available actions:")
-        for action in player.actions:
-            print(f"{action.value}. {action.name}")
+        for task in player.tasks:
+            print(f"{task.value}. {task.name}")
         option = int(input("Choose your action: "))
-        if Action(option) not in player.actions:
+        if Task(option) not in player.tasks:
             raise Exception("Action is not available")
-        return Action(option)
+        return Task(option)
 
     @exception_handler
     def select_card(self, player: Player) -> int:

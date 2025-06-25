@@ -2,7 +2,7 @@ from factory import create_players, create_cards
 from interface import Interface
 from schema.card import Effect
 from schema.deck import DiscardDeck, StockDeck
-from schema.player import Action, Direction, Player
+from schema.player import Task, Direction, Player
 
 
 class Game:
@@ -19,30 +19,30 @@ class Game:
         self.stock_deck.reshuffle()
         self.discard_deck = DiscardDeck(cards=[self.stock_deck.pop()])
         self.current_player = create_players(num_players, self.stock_deck, init_card)
-        self.current_player.init_actions()
+        self.current_player.init_tasks()
 
     def run(self):
         while True:
             try:
-                if not self.current_player.has_actions():
+                if not self.current_player.has_tasks():
                     self.change_turn()
                 self.interface.show_state(self.current_player, self.discard_deck)
-                action = self.interface.select_actions(self.current_player)
-                self.apply_action(action)
+                task = self.interface.select_tasks(self.current_player)
+                self.perform(task)
                 self.interface.show_state(self.current_player, self.discard_deck)
             except Exception as e:
                 print(e)
 
-    def apply_action(self, action: Action):
-        match action:
-            case Action.PICK:
+    def perform(self, task: Task):
+        match task:
+            case Task.PICK:
                 self.current_player.pick_card(self.stock_deck)
-                self.current_player.actions = [Action.PLAY, Action.PASS]
-            case Action.PLAY:
+                self.current_player.tasks = [Task.PLAY, Task.PASS]
+            case Task.PLAY:
                 if self.play():
-                    self.current_player.actions = [Action.PASS]
-            case Action.PASS:
-                self.current_player.actions = []
+                    self.current_player.tasks = [Task.PASS]
+            case Task.PASS:
+                self.current_player.tasks = []
 
     def play(self) -> bool:
         try:
@@ -54,10 +54,8 @@ class Game:
             raise e
 
     def change_turn(self):
-        def disable_effect():
-            self.active_effect = Effect.NONE
-
         affected_player = None
+
         match self.active_effect:
             case Effect.SKIP:
                 affected_player = self.skip()
@@ -72,8 +70,8 @@ class Game:
 
         if affected_player:
             self.interface.effect_message(affected_player, self.active_effect)  # type: ignore
-        self.current_player.init_actions()
-        disable_effect()
+        self.current_player.init_tasks()
+        self.active_effect = Effect.NONE
 
     def skip(self):
         affected_player = self.current_player.change_player(self.direction)  # type: ignore

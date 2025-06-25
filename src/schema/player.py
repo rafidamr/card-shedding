@@ -6,7 +6,7 @@ from schema.card import Card, Color, Effect
 from schema.deck import DiscardDeck, StockDeck
 
 
-class Action(Enum):
+class Task(Enum):
     PASS = auto()
     PICK = auto()
     PLAY = auto()
@@ -21,7 +21,7 @@ class Direction(Enum):
 class Player:
     name: str
     cards: List[Card]
-    actions: List[Action]
+    tasks: List[Task]
     prev: Optional[Self]
     next: Optional[Self]
 
@@ -46,11 +46,11 @@ class Player:
             return card
         raise Exception("Card is not applicable")
 
-    def init_actions(self):
-        self.actions = [Action.PICK, Action.PLAY]
+    def init_tasks(self):
+        self.tasks = [Task.PICK, Task.PLAY]
 
-    def has_actions(self):
-        return len(self.actions) > 0
+    def has_tasks(self):
+        return len(self.tasks) > 0
 
     def change_player(self, d: Direction) -> Optional[Self]:
         return self.next if d == Direction.NEXT else self.prev
