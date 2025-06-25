@@ -59,5 +59,9 @@ class Interface:
             raise Exception("Color is not available")
         return Color(option)
 
+    def show_winner(self, player: Player):
+        print(f"Player {player.name} wins")
+        input("press any key to exit.")
+
     def effect_message(self, player: Player, effect: Effect):
         print(f"[{effect.name.title()}] effect applies on {player.name}")

@@ -31,6 +31,8 @@ class Game:
                 task = self.interface.select_task(self.current_player)
                 self.perform(task)
                 self.interface.show_state(self.current_player, self.discard_deck)
+                if self.is_finished():
+                    break
             except Exception as e:
                 print(e)
 
@@ -97,3 +99,9 @@ class Game:
     def replace_wild(self, card_idx: int) -> Optional[Color]:
         if self.current_player.cards[card_idx].effect == Effect.WILD:
             return self.interface.select_color()
+
+    def is_finished(self) -> bool:
+        if len(self.current_player.cards) == 0:
+            self.interface.show_winner(self.current_player)
+            return True
+        return False
