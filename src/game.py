@@ -1,11 +1,11 @@
-from factory import create_cards
+from factory import create_players, create_cards
 from interface import Interface
 from schema.card import Effect
 from schema.deck import DiscardDeck, StockDeck
-from schema.player import Action, Direction, Player, create_players
+from schema.player import Action, Direction, Player
 
 
-class Engine:
+class Game:
     current_player: Player
     interface: Interface
     stock_deck: StockDeck
@@ -24,8 +24,6 @@ class Engine:
     def run(self):
         while True:
             try:
-                # TBD:
-                # apply effect on next player
                 if not self.current_player.has_actions():
                     self.change_turn()
                 self.interface.show_state(self.current_player, self.discard_deck)
@@ -34,34 +32,6 @@ class Engine:
                 self.interface.show_state(self.current_player, self.discard_deck)
             except Exception as e:
                 print(e)
-
-    def change_turn(self):
-        def disable_effect():
-            self.active_effect = Effect.NONE
-
-        affected_player = None
-        match self.active_effect:
-            case Effect.SKIP:
-                affected_player = self.current_player.change_player(self.direction)  # type: ignore
-                self.current_player = affected_player.change_player(self.direction)  # type: ignore
-            case Effect.REVERSE:
-                self.direction = (
-                    Direction.PREV
-                    if self.direction == Direction.NEXT
-                    else Direction.NEXT
-                )
-                affected_player = self.current_player = self.current_player.change_player(self.direction)  # type: ignore
-            case Effect.DRAW_TWO:
-                affected_player = self.current_player = self.current_player.change_player(self.direction)  # type: ignore
-                self.current_player.pick_card(self.stock_deck)
-                self.current_player.pick_card(self.stock_deck)
-            case _:
-                self.current_player = self.current_player.change_player(self.direction)  # type: ignore
-
-        if affected_player:
-            self.interface.effect_message(affected_player, self.active_effect)  # type: ignore
-        self.current_player.init_actions()
-        disable_effect()
 
     def apply_action(self, action: Action):
         match action:
@@ -83,11 +53,42 @@ class Engine:
         except Exception as e:
             raise e
 
+    def change_turn(self):
+        def disable_effect():
+            self.active_effect = Effect.NONE
+
+        affected_player = None
+        match self.active_effect:
+            case Effect.SKIP:
+                affected_player = self.skip()
+            case Effect.REVERSE:
+                affected_player = self.reverse()
+            case Effect.DRAW_TWO:
+                affected_player = self.force_draw(card_num=2)
+            case Effect.WILD:
+                pass
+            case _:
+                self.current_player = self.current_player.change_player(self.direction)  # type: ignore
+
+        if affected_player:
+            self.interface.effect_message(affected_player, self.active_effect)  # type: ignore
+        self.current_player.init_actions()
+        disable_effect()
+
     def skip(self):
-        pass
+        affected_player = self.current_player.change_player(self.direction)  # type: ignore
+        self.current_player = affected_player.change_player(self.direction)  # type: ignore
+        return affected_player
 
     def reverse(self):
-        pass
+        self.direction = (
+            Direction.PREV if self.direction == Direction.NEXT else Direction.NEXT
+        )
+        affected_player = self.current_player = self.current_player.change_player(self.direction)  # type: ignore
+        return affected_player
 
-    def draw(self, num):
-        pass
+    def force_draw(self, card_num: int):
+        affected_player = self.current_player = self.current_player.change_player(self.direction)  # type: ignore
+        for _ in range(card_num):
+            self.current_player.pick_card(self.stock_deck)
+        return affected_player

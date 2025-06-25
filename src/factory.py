@@ -1,5 +1,20 @@
 from typing import List
 from schema.card import Card, Color, Effect
+from schema.deck import StockDeck
+from schema.player import Player
+
+
+def create_players(num_players: int, deck: StockDeck, num: int) -> Player:
+    player = Player("p0", [], [], next=None, prev=None)
+    player.init_cards(deck, num)
+    first = player
+    for i in range(1, num_players):
+        player.next = Player(f"p{i}", [], [], next=None, prev=player)
+        player = player.next
+        player.init_cards(deck, num)
+    player.next = first
+    first.prev = player
+    return first
 
 
 def create_cards():

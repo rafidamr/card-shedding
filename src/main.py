@@ -1,6 +1,6 @@
-from engine import Engine
+from game import Game
 
 
 if __name__ == "__main__":
-    engine = Engine(num_players=3, init_card=4)
-    engine.run()
+    game = Game(num_players=3, init_card=4)
+    game.run()
